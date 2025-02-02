@@ -1,6 +1,7 @@
 baseURL: https://nith.in/
 languageCode: en-us
 title: Nithin's personal website
+enableGitInfo: true
 
 module:
   imports:

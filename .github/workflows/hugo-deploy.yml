@@ -56,6 +56,9 @@ jobs:
           HUGO_ENVIRONMENT: production
           TZ: America/Los_Angeles
         run: |
+          export HUGOxPARAMSxGITxLAST_COMMITxHASH=$(git rev-parse --short HEAD)
+          export HUGOxPARAMSxGITxLAST_COMMITxDATE=$(git log -1 --format=%cI)
+          export HUGOxPARAMSxGITxLAST_COMMITxAUTHORNAME=$(git log -1 --format=%an)
           hugo \
             --gc \
             --minify \
