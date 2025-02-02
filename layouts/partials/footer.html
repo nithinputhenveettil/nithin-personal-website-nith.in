@@ -67,7 +67,7 @@
   {{ $git_author_name := site.Params.git.last_commit.authorname }}
   {{ $git_date := site.Params.git.last_commit.date }}
   {{ $git_hash := site.Params.git.last_commit.hash }}
-  {{ $git_hash_url := path.Join site.Params.gitRepo "commit" $git_hash }}
+  {{ $git_hash_url := printf "%s/commit/%s" site.Params.gitRepo $git_hash }}
 
 
   <footer id="footer" class="container-fluid text-center align-content-center footer pb-2">
