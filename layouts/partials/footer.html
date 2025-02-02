@@ -198,7 +198,7 @@
     {{ if $credentialsEnabled }}
     <hr />
 
-    <div class="container">
+    <!-- <div class="container">
       <div class="row text-start">
         <div class="col-md-4">
           <a id="theme" href="https://github.com/hugo-toha/toha" target="_blank" rel="noopener">
@@ -217,15 +217,27 @@
           </a>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="container">
+        <div class="row text-start">
+          <div class="col-md-4">
+            Updated At : {{$git_date}}
+          </div>
+          <div class="col-md-4 text-center">{{ $copyrightNotice | markdownify }}</div>
+          <div class="col-md-4 text-end">
+            Hash : {{ $git_hash }}
+          </div>
+        </div>
+      </div>
+
+    <!-- <div class="container">
         <div class="row text-start">
           <div class="col-md-4">
           </div>
           <div class="col-md-4 text-center">{{$git_date}} -- {{ $git_hash }} -- {{ $git_author_name }}</div>
         </div>
-      </div>
+      </div> -->
 
     {{ end }}
   </footer>
