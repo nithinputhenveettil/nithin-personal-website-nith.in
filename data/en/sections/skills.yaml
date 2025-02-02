@@ -1,0 +1,59 @@
+# section information
+section:
+  name: Skills
+  id: skills
+  enable: true
+  weight: 2
+  showOnNavbar: true
+  filter: true
+  # Can optionally hide the title in sections
+  # hideTitle: true
+
+# filter buttons
+buttons:
+- name: All
+  filter: "all"
+- name: Programming
+  filter: "programming"
+# - name: CI/CD
+#   filter: "ci_cd"
+# - name: Tools
+#   filter: "tools"
+# - name: Database
+#   filter: "dbs"
+# - name: Other
+#   filter: "other"
+
+# Your Skills.
+# Give a summary of you each skill in the summary section.
+skills:
+- name: Golang
+  logo: /images/sections/skills/go.png
+  summary: "Currently, I am using Golang as the primary language for both my professional and personal projects. I am proficient in writing scalable, testable, and maintainable programs, including APIs, SDKs, and various tools."
+  categories: ["programming"]
+  url: "https://golang.org/"
+
+- name: NodeJS
+  logo: /images/sections/skills/js.png
+  summary: "I have been working with Node.js since version 4.x and have used it as my main development language for over 5 years. During this time, I have developed a wide range of systems, including API servers, batch jobs, importers/exporters, Lambda functions, and various tool scripts."
+  categories: ["programming"]
+  url: "https://nodejs.org/"
+
+- name: Python
+  logo: /images/sections/skills/python.png
+  summary: "Python has always been my long-lost best friend. I've had a fondness for it since my education days. My main academic project in 2014 was written in Python 2.7. Over time, I've worked on machine learning, scripting, and even some 2D game development with it. Although I moved away from Python and now prefer Golang, I still hold Python close to my heart due to its simplicity and elegance."
+  categories: ["programming"]
+  url: "https://www.python.org/"
+
+- name: Rust
+  logo: /images/sections/skills/rust.png
+  summary: "Rust is the future, and I’m currently learning it. I plan to work full-time on a Rust project in the near future."
+  categories: ["programming"]
+  url: "https://www.rust-lang.org/"
+
+- name: Zig
+  logo: /images/sections/skills/zig.png
+  summary: "Zig is also the future and the future is bright!"
+  categories: ["programming"]
+  url: "https://ziglang.org/"
+

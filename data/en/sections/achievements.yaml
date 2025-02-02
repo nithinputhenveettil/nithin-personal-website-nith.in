@@ -1,0 +1,21 @@
+# section information
+section:
+  name: Achievements
+  id: achievements
+  enable: true
+  weight: 10
+  showOnNavbar: true
+  # Can optionally hide the title in sections
+  # hideTitle: true
+
+# Your achievements achievements
+achievements:
+- title: IBM Growth Award
+  image: /images/sections/achievements/growth_award.png
+  summary: IBM Growth Award - 2024
+
+- title: IBM Manager Appreciation
+  image: /images/sections/achievements/manager_appreciation.png
+  summary: IBM Manager Appreciation with BluePoints - 2023
+
+

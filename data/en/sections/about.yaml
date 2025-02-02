@@ -1,0 +1,91 @@
+# section information
+section:
+  name: About
+  id: about
+  enable: true
+  weight: 1
+  showOnNavbar: true
+  template: sections/about.html
+
+# your designation
+designation: Software Engineer
+# your company information
+company:
+  name: IBM.
+  url: "https://www.ibm.com/in-en"
+
+# your resume. this file path should be relative to you "static" directory
+# Dreprecated. Use resourceLinks instead.
+# resume: "files/Nithin_Resume_new.pdf"
+
+# a summary about you
+summary: 'I am Nithin Puthenveettil, a passionate Backend Engineer from India with over 8 years of experience in the IT industry, specialising in APM, e-commerce, and Self-Checkout Machines. My expertise lies in designing, developing, and deploying large-scale backend systems using Golang and Node.js. I have a strong background in microservices architectures, AWS Lambda functions, and building large-scale production-grade importer/exporter systems. Currently, I am working with IBM on their product Instana, as part of the Go Tracer team. I am responsible for the development and maintenance of the IBM Instana Go SDK. Looking ahead, I am eager to deepen my expertise in Golang and Rust, while also expanding my knowledge in DevOps. My ultimate goal is to continue growing professionally and contributing more to the field of backend engineering through continuous learning.'
+# your social links
+# give as many as you want. use font-awesome for the icons.
+socialLinks:
+- name: Email
+  icon: "fas fa-envelope"
+  url: "nithup123@gmail.com"
+
+- name: Github
+  icon: "fab fa-github"
+  url: "https://www.linkedin.com/in/nithinputhenveettil/"
+
+- name: Stackoverflow
+  icon: "fab fa-stack-overflow"
+  url: "https://stackoverflow.com/users/2632736/nithin-p"
+
+- name: LinkedIn
+  icon: "fab fa-linkedin"
+  url: "https://www.linkedin.com/in/nithinputhenveettil/"
+
+- name: Facebook
+  icon: "fab fa-facebook"
+  url: "https://www.facebook.com/nithinputhenveettil/"
+
+# You can put custom buttons to link your relevant resources.
+# For example, you can put link for your resume.
+resourceLinks:
+- title: "My Resume"
+  url: "files/Nithin_Resume_new.pdf"
+
+# Show your badges
+# You can show your verifiable certificates from https://www.credly.com.
+# You can also show a circular bar indicating the level of expertise on a certain skill
+badges:
+- type: certification
+  name: Rust in 4 Hours
+  url: "https://www.credly.com/badges/f02d8097-17b6-4b02-b4e7-09a05fc6bc34"
+  badge: "https://images.credly.com/size/680x680/images/677ad32b-b88c-402e-b342-259e4a1d7120/1ab56dad-8f7e-48b0-9fa4-019c9170f0a9.png"
+
+- type: certification
+  name: Go Design Patterns
+  url: "https://www.linkedin.com/learning/certificates/425161b1110431a3498764e9288be369f13e91102e164b0828d7cd05b24a3d8c"
+  badge: "https://media.licdn.com/dms/image/v2/C4D1FAQGhIz5hNqA4Ug/feedshare-document-cover-images_1280/feedshare-document-cover-images_1280/0/1656558034823?e=1738940400&v=beta&t=AN64q2i--oOSEJAt9eqMcYfY2e-oVcUaC5tpB9rciaI"
+
+- type: soft-skill-indicator
+  name: Golang expert
+  percentage: 85
+  color: green
+
+- type: soft-skill-indicator
+  name: Team Player
+  percentage: 95
+  color: blue
+
+- type: soft-skill-indicator
+  name: Quick Learner
+  percentage: 90
+  color: yellow
+
+- type: soft-skill-indicator
+  name: Hard Working
+  percentage: 85
+  color: orange
+
+
+# you can also provide color code instead of the color name
+# - type: soft-skill-indicator
+#   name: Example 1
+#   percentage: 75
+#   color: "#00adb5"

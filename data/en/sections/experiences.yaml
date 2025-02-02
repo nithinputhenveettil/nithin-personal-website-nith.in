@@ -1,0 +1,87 @@
+# section information
+section:
+  name: Experiences
+  id: experiences
+  enable: true
+  weight: 3
+  showOnNavbar: true
+  # Can optionally hide the title in sections
+  # hideTitle: true 
+
+# Your experiences
+experiences:
+- company:
+    name: IBM.
+    url: "https://www.ibm.com/"
+    location: Cochin, Kerala, India.
+    logo: /images/sections/experiences/ibm.png
+    # Can optionally show a different logo for dark theme
+    # darkLogo: /images/sections/experiences/company1.jpg
+    # company overview
+    # overview: Example Co. is a widely recognized company for cloud-native development. It builds tools for Kubernetes.
+  positions:
+  - designation: Go Software Engineer
+    start: Oct 2023
+    # don't provide end date if you are currently working there. It will be replaced by "Present"
+    # end: Dec 2020
+    # give some points about what was your responsibilities at the company.
+    responsibilities:
+    - Maintaining IBM Instana Golang Tracer SDK(https://github.com/instana/go-sensor).
+    - Development of new features and bug fixes.
+    - Instrumented Couchbase SDK(GOCB) and FastHttp for Instana.
+    - Automated version support for existing instrumentation libraries.
+    - Created CI pipelines in both GitHub Actions and Tekton.
+
+- company:
+    name: Cambium Networks.
+    url: "https://www.cambiumnetworks.com/"
+    location: Cochin, Kerala, India.
+    logo: /images/sections/experiences/cn.png
+    # Can optionally show a different logo for dark theme
+    # darkLogo: /images/sections/experiences/company2.jpg
+    # overview: PreExample Co. is a gateway company to enter into Example co. So, nothing special here.
+  positions:
+  - designation: Software Engineer
+    start: Aug 2022
+    end: Sep 2023
+    responsibilities:
+    - Worked on creating the backend of a support portal using Golang and PostgreSQL.
+
+- company:
+    name: NCR Corporation.
+    url: "https://www.ncr.com/"
+    location: Hyderabad, Telangana, India.
+    logo: /images/sections/experiences/ncr.png
+    # Can optionally show a different logo for dark theme
+    # darkLogo: /images/sections/experiences/company2.jpg
+    # overview: PreExample Co. is a gateway company to enter into Example co. So, nothing special here.
+  positions:
+  - designation: Software Engineer II
+    start: June 2021
+    end: Aug 2022
+    responsibilities:
+    - Developed a Golang-based microservice using MQTT for handling cash-related APIs in Self Checkout Machines.
+
+- company:
+    name: QBurst.
+    url: "https://www.qburst.com/"
+    location: Koratty, Kerala, India.
+    logo: /images/sections/experiences/qb.png
+    # Can optionally show a different logo for dark theme
+    # darkLogo: /images/sections/experiences/company2.jpg
+    # overview: PreExample Co. is a gateway company to enter into Example co. So, nothing special here.
+  positions:
+  - designation: Senior Engineer
+    start: Aug 2015
+    end: June 2021
+    responsibilities:
+    - Worked as a team lead/bridge engineer at the client location (Japan), coordinating both client and offshore team members.
+    - Led a team of four members to implement a messaging app using LINE API for a popular e-commerce client. Used Express as the REST API framework and MySQL as the database technology. The system includes provision for creating and sending various types of messages to Line users. Also created a small Angular JS application to support the admin side facilities for this messaging app.
+    - Worked on Order History Platform, which includes a Data Importer, REST API Server, and an Admin tool to manage purchase history. Both Importer and API server are written in NodeJS using Express as the server framework.
+    - Worked on Collection Platform, used for creating, reading, updating, and deleting wishlist data. Used Restify as the server framework and MySQL as the database.
+    - Experienced with deploying NodeJS applications on Amazon EC2 using deployment tools such as PM2 and Forever.
+    - Utilized various AWS technologies such as S3, RDS, Lambda, Elasticsearch, and DynamoDB.
+    - Worked with various npm packages such as Bluebird, Express, Jsonwebtoken, Lodash, Cron, Moment, and AWS SDK.
+    - Migrated a large-scale production database from DynamoDB to PostgreSQL.
+
+
