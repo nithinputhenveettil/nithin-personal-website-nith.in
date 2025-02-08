@@ -19,7 +19,7 @@ company:
 # resume: "files/Nithin_Resume_new.pdf"
 
 # a summary about you
-summary: 'I am Nithin Puthenveettil, a passionate Backend Engineer from India with over 8 years of experience in the IT industry, specialising in APM, e-commerce, and Self-Checkout Machines. My expertise lies in designing, developing, and deploying large-scale backend systems using Golang and Node.js. I have a strong background in microservices architectures, AWS Lambda functions, and building large-scale production-grade importer/exporter systems. Currently, I am working with IBM on their product Instana, as part of the Go Tracer team. I am responsible for the development and maintenance of the IBM Instana Go SDK. Looking ahead, I am eager to deepen my expertise in Golang and Rust, while also expanding my knowledge in DevOps. My ultimate goal is to continue growing professionally and contributing more to the field of backend engineering through continuous learning.'
+summary: 'I am Nithin Puthenveettil, a passionate Backend Engineer from India with over 10 years of experience in the IT industry, specializing in APM, e-commerce, and Self-Checkout Machines. My expertise lies in designing, developing, and deploying large-scale backend systems using Golang and Node.js. I have a strong background in microservices architectures, AWS Lambda functions, and building large-scale production-grade importer/exporter systems. Currently, I am working with IBM on their product Instana, as part of the Go Tracer team. I am responsible for the development and maintenance of the IBM Instana Go SDK. In addition to my work, I am deeply interested in Linux kernel development and eBPF. I am constantly exploring how these technologies can optimize low-level systems, improve performance, and enable powerful tracing capabilities. I am passionate about learning how to leverage eBPF to enhance observability and build efficient, high-performance solutions. Looking ahead, I am eager to deepen my expertise in Golang and Rust, while also expanding my knowledge in DevOps. My ultimate goal is to continue growing professionally and contribute more to the field of backend engineering through continuous learning.'
 # your social links
 # give as many as you want. use font-awesome for the icons.
 socialLinks:
@@ -61,7 +61,12 @@ badges:
 - type: certification
   name: Go Design Patterns
   url: "https://www.linkedin.com/learning/certificates/425161b1110431a3498764e9288be369f13e91102e164b0828d7cd05b24a3d8c"
-  badge: "https://media.licdn.com/dms/image/v2/C4D1FAQGhIz5hNqA4Ug/feedshare-document-cover-images_1280/feedshare-document-cover-images_1280/0/1656558034823?e=1738940400&v=beta&t=AN64q2i--oOSEJAt9eqMcYfY2e-oVcUaC5tpB9rciaI"
+  badge: "https://github.com/user-attachments/assets/4294781b-bd28-4bbd-9e7b-aef93cf0c273"
+
+- type: certification
+  name: Custom eBPF Programs
+  url: "https://www.credly.com/badges/725fd37f-9045-4780-9695-b1316b41899f/public_url"
+  badge: "https://images.credly.com/images/f40993e5-93fb-4551-9531-686ba872b661/0ff4ff7b-4359-43a9-beb9-0163401d1c29.png"
 
 - type: soft-skill-indicator
   name: Golang expert
