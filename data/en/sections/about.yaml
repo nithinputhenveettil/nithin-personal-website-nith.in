@@ -54,9 +54,24 @@ resourceLinks:
 # You can also show a circular bar indicating the level of expertise on a certain skill
 badges:
 - type: certification
+  name: Developer Profession - Level 2 Experienced
+  url: "https://www.credly.com/badges/89bddc11-2883-424a-b22a-057d81924252"
+  badge: "https://images.credly.com/images/415eaba6-0731-464e-a1eb-ed35eff8c3e7/Developer-Experienced1.png"
+
+- type: certification
+  name: IBM Open Source Committer
+  url: "https://www.credly.com/badges/5b0d0164-3e4e-4b7b-8d68-7dbfd2e1add2"
+  badge: "https://images.credly.com/images/c139003f-f1c5-49f5-8e85-fbefff577a39/Open-Source-Committer.png"
+
+- type: certification
+  name: IBM Open Source Contributor
+  url: "https://www.credly.com/badges/59615db3-2c39-457d-9287-acb1f9641426"
+  badge: "https://images.credly.com/images/46512f2a-864c-4c7b-bb2d-73555fd6d52e/Open-Source-Contributor.png"
+
+- type: certification
   name: Rust in 4 Hours
   url: "https://www.credly.com/badges/f02d8097-17b6-4b02-b4e7-09a05fc6bc34"
-  badge: "https://images.credly.com/size/680x680/images/677ad32b-b88c-402e-b342-259e4a1d7120/1ab56dad-8f7e-48b0-9fa4-019c9170f0a9.png"
+  badge: "https://images.credly.com/images/aec8028e-2f7b-42b7-995b-41e5619eb94c/1ab56dad-8f7e-48b0-9fa4-019c9170f0a9.png"
 
 - type: certification
   name: Go Design Patterns
@@ -66,7 +81,7 @@ badges:
 - type: certification
   name: Custom eBPF Programs
   url: "https://www.credly.com/badges/725fd37f-9045-4780-9695-b1316b41899f/public_url"
-  badge: "https://images.credly.com/images/f40993e5-93fb-4551-9531-686ba872b661/0ff4ff7b-4359-43a9-beb9-0163401d1c29.png"
+  badge: "https://images.credly.com/images/cfe90afc-f2ed-421f-9d52-76464e36fe51/0ff4ff7b-4359-43a9-beb9-0163401d1c29.png"
 
 - type: soft-skill-indicator
   name: Golang expert
@@ -83,10 +98,10 @@ badges:
   percentage: 90
   color: yellow
 
-- type: soft-skill-indicator
-  name: Hard Working
-  percentage: 85
-  color: orange
+# - type: soft-skill-indicator
+#   name: Hard Working
+#   percentage: 85
+#   color: orange
 
 
 # you can also provide color code instead of the color name
