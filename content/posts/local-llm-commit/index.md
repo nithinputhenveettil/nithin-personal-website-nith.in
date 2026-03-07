@@ -14,7 +14,7 @@ categories: ["Machine Learning", "Developer Tools"]
 
 ## Introduction
 
-So, this is the very first time I am actually trying to train an LLM locally. I have been using these LLMs for a while now, and honestly, I am quite impressed with their capabilities. So, I thought, why not try some *jugaad* and train one locally on my own machine? 
+So, this is the very first time I am actually trying to train an LLM locally. I have been using these LLMs for a while now, and honestly, I am quite impressed with their capabilities. So, I thought, why not try a custom setup and train one locally on my own machine? 
 
 The setup I used:
 
@@ -144,6 +144,8 @@ From each repository, we extract:
 - The commit message
 - The git diff
 
+![Generating the dataset](/images/posts/local-llm-commit/Training_Dataset_Generation.png)
+
 Example training pair so you get the exact idea:
 
 ```text
@@ -206,13 +208,205 @@ Total dataset size:
 ~1400 samples
 ```
 
+### The Grand AI Dataset Extraction Script
+
+In case you want to try this setup yourself, here is the exact Python script I used to scrape, filter, and build the dataset directly from the local git repositories. It handles all the heavy lifting: extracting diffs, ditching garbage commits, and making sure our final sample sizes are perfectly balanced so the model doesn't just spew out 'refactor' for everything.
+
+```python
+import subprocess
+import json
+import random
+import re
+from pathlib import Path
+from collections import defaultdict
+
+# Config
+
+REPOS_DIR = "repos"
+OUTPUT_DIR = "dataset"
+
+MAX_DIFF_CHARS = 2000
+MAX_DIFF_LINES = 200
+MIN_DIFF_LINES = 3
+
+VALID_SPLIT = 0.1
+
+TARGET_PER_TYPE = {
+    "feat": 400,
+    "fix": 400,
+    "refactor": 400,
+    "perf": 200
+}
+
+TYPE_REGEX = re.compile(r"^(feat|fix|refactor|perf)(\(.+\))?:", re.IGNORECASE)
+
+# GIT HELPERS
+
+def get_commits(repo_path):
+
+    commits = subprocess.check_output(
+        ["git", "-C", repo_path, "log", "--pretty=%H|%s"],
+        text=True
+    ).splitlines()
+
+    for line in commits:
+
+        try:
+            sha, msg = line.split("|", 1)
+        except ValueError:
+            continue
+
+        yield sha, msg.strip()
+
+def get_diff(repo_path, sha):
+
+    try:
+        diff = subprocess.check_output(
+            ["git", "-C", repo_path, "show", sha, "--pretty=", "--unified=0"],
+            text=True,
+            stderr=subprocess.DEVNULL
+        )
+    except:
+        return None
+
+    if not diff:
+        return None
+
+    # skip very large diffs
+    if diff.count("\n") > MAX_DIFF_LINES:
+        return None
+
+    if len(diff) > MAX_DIFF_CHARS:
+        diff = diff[:MAX_DIFF_CHARS]
+
+    # keep only actual code changes
+    diff_lines = [
+        line for line in diff.splitlines()
+        if (line.startswith("+") or line.startswith("-"))
+        and not line.startswith("+++")
+        and not line.startswith("---")
+    ]
+
+    if len(diff_lines) < MIN_DIFF_LINES:
+        return None
+
+    diff = "\n".join(diff_lines)
+
+    return diff
+
+# CLEANERS
+
+def clean_message(msg):
+
+    msg = msg.replace("<|im_end|>", "")
+    msg = msg.strip()
+
+    return msg
+
+# DATASET FORMATTER
+
+def build_example(diff, message):
+
+    return {
+        "messages": [
+            {
+                "role": "user",
+                "content": f"Generate a conventional commit message for this diff:\n\n{diff}"
+            },
+            {
+                "role": "assistant",
+                "content": message
+            }
+        ]
+    }
+
+# MAIN DATASET BUILDER
+
+def main():
+
+    Path(OUTPUT_DIR).mkdir(exist_ok=True)
+
+    buckets = defaultdict(list)
+
+    for repo in Path(REPOS_DIR).iterdir():
+
+        if not repo.is_dir():
+            continue
+
+        print("Scanning repo:", repo.name)
+
+        for sha, msg in get_commits(str(repo)):
+
+            msg = clean_message(msg)
+
+            match = TYPE_REGEX.match(msg)
+
+            if not match:
+                continue
+
+            commit_type = match.group(1).lower()
+
+            if commit_type not in TARGET_PER_TYPE:
+                continue
+
+            if len(buckets[commit_type]) >= TARGET_PER_TYPE[commit_type]:
+                continue
+
+            diff = get_diff(str(repo), sha)
+
+            if not diff:
+                continue
+
+            example = build_example(diff, msg)
+
+            buckets[commit_type].append(example)
+
+    # combine dataset
+    dataset = []
+
+    for k, v in buckets.items():
+        dataset.extend(v)
+
+    random.shuffle(dataset)
+
+    # split train / valid
+    split_index = int(len(dataset) * (1 - VALID_SPLIT))
+
+    train = dataset[:split_index]
+    valid = dataset[split_index:]
+
+    # write train set
+    with open(f"{OUTPUT_DIR}/train.jsonl", "w") as f:
+        for row in train:
+            f.write(json.dumps(row) + "\n")
+
+    # write validation set
+    with open(f"{OUTPUT_DIR}/valid.jsonl", "w") as f:
+        for row in valid:
+            f.write(json.dumps(row) + "\n")
+
+    # stats
+    print("\nDataset distribution:")
+
+    for k, v in buckets.items():
+        print(k, len(v))
+
+    print("\nTrain:", len(train))
+    print("Valid:", len(valid))
+
+    print("\nDataset written to:", OUTPUT_DIR)
+
+if __name__ == "__main__":
+    main()
+```
+
 ---
 
 ## Training Format
 
 Each training sample we prepared exactly looks like this (yes, actual JSONL format, not some fake string):
 
-```jsonl
+```json
 {"messages": [{"role": "user", "content": "Generate a conventional commit message for this diff:\n\n+import { DestroyRef } from '@angular/core';\n+import { MonoTypeOperatorFunction } from 'rxjs';\n+// @public\n+export function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;\n+\n+export {takeUntilDestroyed} from './take_until_destroyed';\n+/**\n+ * @license\n+ * Copyright Google LLC All Rights Reserved.\n+ *\n+ * Use of this source code is governed by an MIT-style license that can be\n+ * found in the LICENSE file at https://angular.io/license\n+ */\n+\n+import {assertInInjectionContext, DestroyRef, inject} from '@angular/core';\n+import {MonoTypeOperatorFunction, Observable} from 'rxjs';\n+import {takeUntil} from 'rxjs/operators';\n+\n+/**\n+ * Operator which completes the Observable when the calling context (component, directive, service,\n+ * etc) is destroyed.\n+ *\n+ * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be\n+ *     passed explicitly to use `takeUntilDestroyed` outside of an injection context. Otherwise, the\n+ * current `DestroyRef` is injected.\n+ *\n+ * @developerPreview\n+ */\n+exp"}, {"role": "assistant", "content": "feat(core): implement `takeUntilDestroyed` in rxjs-interop (#49154)"}]}
 ```
 
@@ -247,6 +441,8 @@ Important parameters to note:
 
 The entire training runs peacefully on the **Apple GPU via MLX**.
 
+![Starting the LoRA Finetuning process](/images/posts/local-llm-commit/finetuning-start.png)
+
 Note: Please be informed that I had to do a lot of trial-and-error with these parameters for quite some time to get decent results. 
 
 ---
@@ -269,13 +465,17 @@ Train loss: 1.13
 Val loss:   1.18
 ```
 
+![Finetuning completed successfully](/images/posts/local-llm-commit/finetuning-end.png)
+
 The validation loss steadily decreased, meaning our model actually learned the mapping instead of just mugging up the answers (no overfitting, yay!).
 
 ---
 
 ## Generating Commit Messages
 
-After the training was successfully completed, the LoRA adapter could be loaded hand-in-hand with the base model.
+After the training was successfully completed, the LoRA adapter could be loaded hand-in-hand with the base model. Here are the freshly baked adapter files sitting in my directory:
+
+![LoRA adapter files generated after finetuning](/images/posts/local-llm-commit/Finetuning_Files.png)
 
 Example prompt to test it out:
 
@@ -313,6 +513,8 @@ add JWT validation
 reject expired tokens
 ```
 
+![Testing the base model response](/images/posts/local-llm-commit/Test_Result_Base_Model.png)
+
 The base model simply repeats whatever is in the diff. Absolutely zero effort, and it basically **fails completely to generate a structured commit message**.
 
 ### The Fine-Tuned Model Response
@@ -320,6 +522,8 @@ The base model simply repeats whatever is in the diff. Absolutely zero effort, a
 ```text
 feat(core): add JWT validation and reject expired tokens
 ```
+
+![Testing the fine-tuned model response](/images/posts/local-llm-commit/Test_Result_After_Finetuning.png)
 
 Oh, just look at that beauty! The fine-tuned model:
 
@@ -368,7 +572,7 @@ This happens because some of our training repositories actually include PR refer
 
 ## Limitations
 
-As with all great initial *jugaads*, this experiment has a few limitations.
+As with all great initial setups, this experiment has a few limitations.
 
 ### Small dataset
 
