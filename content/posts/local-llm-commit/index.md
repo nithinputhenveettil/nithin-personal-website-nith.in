@@ -12,6 +12,23 @@ tags: ["llm", "machine-learning", "mlx", "apple-silicon", "qwen", "lora", "conve
 categories: ["Machine Learning", "Developer Tools"]
 ---
 
+## Introduction
+
+This is first time I am tryting to train a LLM model locally. I have been using LLMs for a while now and I am very impressed with their capabilities. So I thought of trying to train a LLM model locally. 
+
+The tools I used:
+
+- Apple MacBook Pro - M4 Pro
+- MLX
+- LoRA
+- Qwen3.5-2B
+- LM Studio
+- Python
+
+I thought of train Qwen 3.5 2B Base model to generate more human like commit messages which in the conventional commit format.
+
+## The thing about Commit Messages
+
 > Writing good commit messages is a small but constant friction in daily development.
 
 Most of us end up writing things like:
@@ -43,7 +60,7 @@ So I wondered:
 
 In this post, I will walk through how I built a **commit message generator** by fine-tuning a small open model locally using **MLX** and **LoRA**.
 
-The entire experiment runs **on a MacBook**, without requiring any cloud GPUs.
+The entire experiment runs **on my MacBook**, without requiring any cloud GPUs.
 
 ---
 
@@ -83,7 +100,6 @@ Reasons for choosing it:
 
 - Small enough to run locally
 - Good base instruction capability
-- Widely supported in tooling
 
 To train locally on Apple Silicon, I used **MLX**.
 
@@ -111,16 +127,16 @@ To train the model we need examples of:
 Diff → Commit message
 ```
 
-I collected commits from several popular repositories that generally follow conventional commit style.
+I collected commits from several popular repositories that generally follow conventional commit style (Ofcourse chatGPT helped me with this process :P)
 
 Repositories used:
 
 ```
 angular
+cz-cli
+nest
 next.js
-nestjs
 semantic-release
-commitizen
 ```
 
 From each repository we extract:
@@ -132,8 +148,7 @@ Example training pair:
 
 ```
 Diff:
-+ add JWT validation
-+ reject expired tokens
+# The diff here
 
 Commit:
 feat(auth): add JWT validation and reject expired tokens
@@ -150,7 +165,7 @@ Raw commit history contains a lot of noise:
 - Auto-generated commits
 - Inconsistent formatting
 
-So several filters were applied.
+So several filters were applied (Again chatGPT helped :P).
 
 ### Remove large diffs
 
@@ -239,7 +254,10 @@ Important parameters:
 | Sequence length | 256 |
 | Learning rate | 5e-5 |
 
+
 Training runs entirely on **Apple GPU through MLX**.
+
+Note: I have to play with these parameters for a time to get the best results.
 
 ---
 
@@ -348,7 +366,7 @@ This likely comes from projects like Angular.
 
 ### GitHub style commits
 
-Occasionally the model adds PR numbers:
+Occasionally the model hallucinates and adds PR numbers from the thin air(wow that's some imrpovemtn I would say :P):
 
 ```
 feat(core): add JWT validation (#12345)
@@ -416,7 +434,7 @@ core/
 
 ### Longer context window
 
-Increasing sequence length to **384–512 tokens** would allow larger diffs.
+Increasing sequence length to **384–512 tokens** would allow larger diffs (But as powerfull my personal machine is, it can't handle it :P)
 
 ---
 
@@ -429,7 +447,7 @@ No cloud GPUs. No expensive infrastructure.
 Just:
 
 ```
-MacBook + MLX + LoRA
+MacBook Pro M4 Pro + MLX + LoRA
 ```
 
 This makes experimenting with domain-specific LLMs very accessible for individual developers.
@@ -457,6 +475,8 @@ As local LLM tooling improves, we will likely see more specialised models traine
 
 Small, focused models like this can be surprisingly effective.
 
+And how facinating this is, I can't wait to see what the future holds.
+
 ---
 
 ## References
@@ -469,3 +489,4 @@ https://github.com/QwenLM
 
 Conventional Commits  
 https://www.conventionalcommits.org/
+
