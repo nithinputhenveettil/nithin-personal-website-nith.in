@@ -1,7 +1,10 @@
-baseURL: https://nith.in/
+baseURL: https://pnith.in/
 languageCode: en-us
 title: Nithin's personal website
 enableGitInfo: true
+services:
+  googleAnalytics:
+    id: G-RVJVPFEM7M
 
 module:
   imports:
@@ -66,6 +69,12 @@ params:
     maxVisibleSections: 6
 
   features:
+
+    analytics:
+      enabled: true
+      services:
+        google:
+          id: G-RVJVPFEM7M
     # Enable portfolio section
     portfolio:
       enable: false
