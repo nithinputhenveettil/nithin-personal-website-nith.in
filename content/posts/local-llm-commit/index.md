@@ -1,36 +1,81 @@
 ---
-title: "I Trained a Local LLM to Write Git Commit Messages and here is the result"
-date: 2026-03-07
-description: Training a small local LLM using MLX and LoRA to do the needful and generate conventional commit messages from git diffs.
+title: "Training a Local LLM to Generate Git Commit Messages (MLX + LoRA)"
+date: 2026-03-08
+description: Training a small local LLM using MLX and LoRA to generate conventional commit messages directly from git diffs.
 hero: /images/posts/local-llm-commit/hero.png
 menu:
   sidebar:
     name: Finetuning LLM locally
     identifier: blog-local-llm-commit
     weight: 10
-tags: ["llm", "machine-learning", "mlx", "apple-silicon", "qwen", "lora", "conventional-commits", "git", "developer-tools", "blog"]
+tags: ["llm", "machine-learning", "mlx", "apple-silicon", "qwen", "lora", "conventional-commits", "git", "developer-tools"]
 categories: ["Machine Learning", "Developer Tools"]
+---
+
+>I trained a small local LLM to generate conventional Git commit messages directly from diffs.The entire setup runs locally on a MacBook using MLX + LoRA, and training took about 25 minutes.Here is how the pipeline works.
+
+---
+
+## TL;DR
+
+- Fine-tuned **Qwen3.5-2B-Base** locally using **MLX + LoRA**
+- Built a dataset of **~1400 commit diffs**
+- Training took **~25 minutes on a MacBook M4 Pro**
+- Final model generates **conventional commit messages from diffs**
+
+Example:
+
+Diff:
+
+```text
++ add JWT validation
++ reject expired tokens
+```
+
+Output:
+
+```text
+feat(core): add JWT validation and reject expired tokens
+```
+
 ---
 
 ## Introduction
 
-Machine Learning was never a new thing for me, it fascinated me every single time since I first started learning it. Back in 2014, while checking out the latest research papers for my academic project, the sheer capabilities of ML completely blew my mind. 
+Machine Learning has fascinated me for a very long time.
 
-Instead of writing endless `if-else` conditions, we could actually let the model learn the logic and do the needful. How fascinating is that?
+Back in **2014**, while working on my college academic project, I remember reading research papers and being completely amazed by the idea that instead of writing endless `if-else` rules, we could train a model and let it learn the logic itself.
 
-Back then, I didn't even have a proper internet connection at home. All I had was a Linux PC with an Intel Dual-Core CPU, a whopping 2GB of RAM, and an Idea 2G data card. The speed was worse than a classic dial-up connection, and highly unstable too.
+The funny part is, my setup back then was terrible.
 
-But I still remember the thrill. I literally had to kill the X-Server (the Linux GUI) just to squeeze out some extra processing juice to train the model. 
+I had:
 
-That college project was a massive success (or at least I like to say that it was). I managed to train a model to learn the specific writing styles of various authors and predict who wrote which book. You can check out that vintage code right here: [Authorship Predictor](https://github.com/nithinputhenveettil/authorship-predictor)
+- A Linux PC
+- Intel dual-core CPU
+- **2GB RAM**
+- An Idea 2G data card
 
-Fast forward 12 years to yesterday, and I decided to train another model. This time, the mission was to fine-tune a local LLM to generate conventional git commit messages straight from diffs. And thankfully, computing power is no longer an issue. My current personal machine is a MacBook Pro with an M4 Pro chip and 24GB of RAM, better in absolutely every sense.
+Internet speed was painfully slow and unstable. Sometimes it felt worse than dial-up.
 
-After using all these huge LLMs for a while and being thoroughly impressed, I just thought: why not try a custom setup and cook one up locally on my own machine? 
+To train my model I literally had to **kill the X server (Linux GUI)** so that the CPU and RAM could focus only on training.
 
-The joy and happiness remained exactly the same as 12 years ago. The computing power, the tools, and the entire process have changed drastically, but the core thrill of training a model? Still intact. 
+That college project was an **authorship prediction model** which tried to identify which author wrote a given book. The code is still on GitHub if anyone is curious:
 
-So grab your coffee, because in this blog, I am taking you along for the ride. Let's get started.
+https://github.com/nithinputhenveettil/authorship-predictor
+
+Fast forward **12 years**, and yesterday I decided to train another model.
+
+This time the goal was simple:
+
+> Train a small **local LLM** to generate **conventional Git commit messages directly from diffs**.
+
+Thankfully computing power is not a problem anymore. My current machine is a **MacBook Pro with M4 Pro and 24GB RAM**.
+
+The hardware has changed. The tools have changed.
+
+But the excitement of training a model? Exactly the same.
+
+So in this post I will walk through how I built a **commit message generator** that runs completely **locally on my laptop**.
 
 ---
 
@@ -38,34 +83,39 @@ So grab your coffee, because in this blog, I am taking you along for the ride. L
 
 Here is the exact setup I used:
 
-- Apple MacBook Pro (M4 Pro, 24GB RAM)
-- MLX Framework
-- LoRA (Low-Rank Adaptation)
+- MacBook Pro (M4 Pro, 24GB RAM)
+- Python
+- MLX
+- LoRA (Low Rank Adaptation)
 - Model: `Qwen3.5-2B-Base`
 - LM Studio (for testing)
-- Python
 
-I decided to train this 2B parameter Qwen Base model to kindly act like a human and generate conventional commit messages for me, simply so I can stop typing them myself. Being lazy is the true mother of invention, right?
+The idea was to fine-tune this **2B parameter model** so that it can look at a git diff and generate a proper commit message.
+
+Mostly because I am lazy and I don't want to type them myself.
 
 ---
 
 ## The Trouble with Commit Messages
 
-> Writing good commit messages is a small but constant headache in our daily development lives, I am telling you.
+Writing good commit messages is a small but constant friction in daily development.
 
-Most of us end up writing absolute nonsense on a Friday evening, like:
-- `fix stuff`
-- `update code`
-- `minor change`
-- `asdfghjkl`
+Most of us end up writing things like:
 
-But well-structured commit messages are extremely useful. They drastically improve:
+```text
+fix stuff
+update code
+minor change
+```
+
+But well-structured commit messages are actually very useful. They improve:
+
 - Code history readability
 - Automated changelogs
 - Release notes
-- Preventing your tech lead from shouting at you on Monday morning
+- Collaboration across teams
 
-The **Conventional Commits** format solves this issue beautifully:
+The **Conventional Commits** format solves this nicely:
 
 ```text
 feat(auth): add JWT validation
@@ -73,37 +123,35 @@ fix(api): handle invalid token error
 refactor(core): simplify request pipeline
 ```
 
-But typing them out manually every single time? Very repetitive, right?
+However writing them manually every time still feels repetitive.
 
-So, I simply wondered:
+So I wondered:
 
-> Can I just train a small **local LLM** to look at my git diffs and automatically do the needful by generating conventional commit messages?
+> Can I train a small **local LLM** to generate conventional commit messages directly from git diffs?
 
-In this post, I will walk you through exactly how I built a **commit message generator** by fine-tuning a small open-source model locally. 
-
-And the best part? The whole drama runs **strictly on my MacBook**. No cloud GPUs, no AWS billing shocks.
+That is exactly what this experiment tries to do.
 
 ---
 
 ## Overview
 
-The architecture looks somewhat like this:
+The pipeline looks like this.
 
-![Architecture Overview](/images/posts/local-llm-commit/overview.svg)
+![Overview](/images/posts/local-llm-commit/overview.svg)
 
 ```text
-Some Good Open Source Git Repositories
+Git repositories
         ↓
-Extract commits and their diffs
+Extract commits and diffs
         ↓
-Clean and balance the dataset
+Clean and balance dataset
         ↓
-Fine-tune the model with LoRA (using MLX)
+Fine tune model with LoRA
         ↓
-Generate commit messages like a boss
+Generate commit messages
 ```
 
-The sole purpose of this entire exercise is to make the model learn this one neat magic trick:
+The model basically learns this mapping:
 
 ```text
 git diff → conventional commit message
@@ -113,43 +161,46 @@ git diff → conventional commit message
 
 ## Choosing the Model
 
-For this experiment, my choice was:
+For this experiment I used:
 
 ```text
 Qwen3.5-2B-Base
 ```
 
-The reasons for choosing this specific model:
-- It's small enough to run locally without my Mac's temper boiling over.
-- It has excellent base instruction-following capabilities.
+Reasons:
 
-Now, to train locally on Apple Silicon, I used **MLX**, which is Apple’s very own machine learning framework optimized specifically for Apple GPUs using Metal. 
+- Small enough to run locally
+- Good instruction capability
+- Works nicely with MLX
 
-For the fine-tuning process, I went with **LoRA** (Low-Rank Adaptation).
+To train locally on Apple Silicon I used **MLX**, Apple’s machine learning framework optimized for Apple GPUs.
 
-Instead of retraining the whole massive model from scratch (and blowing up my laptop in the process), LoRA only updates a very tiny subset of parameters. 
+For fine-tuning I used **LoRA (Low Rank Adaptation)**.
 
-Take a look at the training output:
+Instead of updating the entire model, LoRA only trains a very small subset of parameters.
+
+Example training output:
 
 ```text
 Trainable parameters: 0.298% (5.6M / 1.88B)
 ```
 
-See? We are training **less than 1%** of the full model, which makes the whole process blazingly fast.
+So we are training **less than 1% of the model**.
 
 ---
 
 ## Building the Dataset
 
-To train the model, we obviously need a solid set of examples showing:
+To train the model we need examples of:
 
 ```text
 Diff → Commit message
 ```
 
-I collected commits from a bunch of popular repositories that generally follow the conventional commit style (and yes, ChatGPT kindly helped me write the boilerplate scripts for this process :P).
+I collected commits from several popular repositories that mostly follow conventional commit style.
+(and yes, tools like ChatGPT helped generate some of the boilerplate scripts for extracting the dataset)
 
-The repositories I used:
+Repositories used:
 
 ```text
 angular
@@ -159,17 +210,19 @@ next.js
 semantic-release
 ```
 
-From each repository, we extract:
-- The git diff
-- The corresponding commit message
+From each repository I extracted:
 
-![Generating the dataset](/images/posts/local-llm-commit/Training_Dataset_Generation.png)
+- commit message
+- git diff
 
-Here is a quick example of a training pair so you get the exact idea:
+![Dataset generation](/images/posts/local-llm-commit/Training_Dataset_Generation.png)
+
+Example training pair:
 
 ```text
 Diff:
-# The raw code diff goes here
++ add JWT validation
++ reject expired tokens
 
 Commit:
 feat(auth): add JWT validation and reject expired tokens
@@ -177,49 +230,48 @@ feat(auth): add JWT validation and reject expired tokens
 
 ---
 
-### Cleaning the Dataset
+## Cleaning the Dataset
 
-Now, raw commit history contains a ridiculous amount of garbage:
-- Merge commits
-- Unnecessarily massive diffs
-- Auto-generated bot commits
-- People typing whatever they want
+Raw commit history contains a lot of noise:
 
-So, several filters were forcefully applied to clean up this mess.
+- merge commits
+- very large diffs
+- bot commits
+- inconsistent formatting
 
-#### 1. Remove large diffs
+So several filters were applied.
 
-Huge diffs strictly do not fit within the model's context window.
+### Remove large diffs
+
+Large diffs do not fit the model context window.
 
 ```python
 if diff.count("\n") > 200:
-    skip() # Please go away
+    skip
 ```
 
-#### 2. Enforce the conventional format
+### Enforce conventional commit format
 
-We only kept top-tier commits that matched perfectly with these prefixes:
+Only these commit types were kept:
 
 ```text
-feat:
-fix:
-refactor:
-perf:
+feat
+fix
+refactor
+perf
 ```
 
-#### 3. Balance the commit types
+### Balance commit types
 
-If one commit type dominates our precious dataset, the model will just rote-memorize it like an engineering student the night before the final exams. 
+If one type dominates, the model becomes biased.
 
-Believe me, I learned this the hard way. During my first few tries, the model was just spewing out `docs:` for absolutely everything because it was the most common type in the raw data. We need balance, yaar!
-
-Final balanced dataset distribution:
+Final dataset distribution:
 
 ```text
-refactor: 400
-feat:     400
-fix:      400
-perf:     200
+refactor 400
+feat     400
+fix      400
+perf     200
 ```
 
 Total dataset size:
@@ -227,6 +279,8 @@ Total dataset size:
 ```text
 ~1400 samples
 ```
+
+---
 
 ### The Dataset Extraction Script
 
@@ -424,21 +478,9 @@ if __name__ == "__main__":
 
 ---
 
-## Training Format
-
-Each training sample we prepared looks exactly like this. Yes, we used proper JSONL formatting, not some fake string arrays:
-
-```json
-{"messages": [{"role": "user", "content": "Generate a conventional commit message for this diff:\n\n+import { DestroyRef } from '@angular/core';\n+import { MonoTypeOperatorFunction } from 'rxjs';\n+// @public\n+export function takeUntilDestroyed<T>(destroyRef?: DestroyRef): MonoTypeOperatorFunction<T>;\n+\n+export {takeUntilDestroyed} from './take_until_destroyed';\n+/**\n+ * @license\n+ * Copyright Google LLC All Rights Reserved.\n+ *\n+ * Use of this source code is governed by an MIT-style license that can be\n+ * found in the LICENSE file at https://angular.io/license\n+ */\n+\n+import {assertInInjectionContext, DestroyRef, inject} from '@angular/core';\n+import {MonoTypeOperatorFunction, Observable} from 'rxjs';\n+import {takeUntil} from 'rxjs/operators';\n+\n+/**\n+ * Operator which completes the Observable when the calling context (component, directive, service,\n+ * etc) is destroyed.\n+ *\n+ * @param destroyRef optionally, the `DestroyRef` representing the current context. This can be\n+ *     passed explicitly to use `takeUntilDestroyed` outside of an injection context. Otherwise, the\n+ * current `DestroyRef` is injected.\n+ *\n+ * @developerPreview\n+ */\n+exp"}, {"role": "assistant", "content": "feat(core): implement `takeUntilDestroyed` in rxjs-interop (#49154)"}]}
-```
-
-The model essentially learns to nicely play the role of an "assistant". It looks at the user's diff, and replies with a properly formatted conventional commit message.
-
----
-
 ## Training the Model
 
-MLX provides a very straightforward command to kick off the LoRA training. Just fire this command in your terminal, sit back, and relax:
+Training was done using MLX LoRA.
 
 ```bash
 mlx_lm.lora \
@@ -449,7 +491,7 @@ mlx_lm.lora \
   --iters 1000 \
   --learning-rate 5e-5 \
   --max-seq-length 256 \
-  --adapter-path commit-lora
+  --adapter-path commit-lora-new
 ```
 
 A few important parameters to note:
@@ -461,19 +503,19 @@ A few important parameters to note:
 | Sequence length | 256 |
 | Learning rate | 5e-5 |
 
-The entire training runs peacefully on the **Apple GPU via MLX**. 
-
-![Starting the LoRA Finetuning process](/images/posts/local-llm-commit/finetuning-start.png)
-
 *Note: Please be informed that I had to do quite a bit of trial-and-error with these parameters to actually get decent results.*
 
-Overall, the training only took around **20 - 25 minutes** to complete!
+Training ran on the **Apple GPU via MLX**.
+
+![Training start](/images/posts/local-llm-commit/finetuning-start.png)
+
+Training time was around **20–25 minutes**.
 
 ---
 
-## Training Progress
+### Training Progress
 
-The training logs showed a lovely, gradual improvement over time:
+Logs showed steady improvement.
 
 ```text
 Iter 1:   Val loss 1.66
@@ -482,28 +524,30 @@ Iter 400: Val loss 1.25
 Iter 1000: Val loss 1.18
 ```
 
-And finally, our report card:
+Final result:
 
 ```text
 Train loss: 1.13
 Val loss:   1.18
 ```
 
-![Finetuning completed successfully](/images/posts/local-llm-commit/finetuning-end.png)
-
-The validation loss steadily decreased, meaning our model actually learned the mapping instead of just mugging up the answers (no overfitting, yay!).
+![Training end](/images/posts/local-llm-commit/finetuning-end.png)
 
 ---
 
-## Testing (Generating Commit Messages)
+### Adapter Files
 
-After the training was successfully completed, the LoRA adapter could be loaded hand-in-hand with the base model. Of course, we can use MLX for the inference, or load it up in LM Studio or any other tool of your choice.
+After training MLX generated LoRA adapter weights.
 
-Here are the freshly baked adapter files sitting nicely in my directory:
+![Adapter files](/images/posts/local-llm-commit/Finetuning_Files.png)
 
-![LoRA adapter files generated after finetuning](/images/posts/local-llm-commit/Finetuning_Files.png)
+These adapters are only around **20MB**, which is much smaller than the base model.
 
-Let's use an example prompt to test it out:
+---
+
+## Testing the Model
+
+Example prompt:
 
 ```text
 Generate a conventional commit message.
@@ -515,7 +559,7 @@ Diff:
 Commit:
 ```
 
-And here is the magical inference command:
+Inference command:
 
 ```bash
 mlx_lm.generate \
@@ -530,121 +574,89 @@ mlx_lm.generate \
 
 ## Results
 
-Let’s do a face-off. **Base model vs. Fine-Tuned model**. Who will win?
+Let's compare the **base model vs fine-tuned model**.
 
-### The Base Model Response
+### Base Model
 
 ```text
 add JWT validation
 reject expired tokens
 ```
 
-![Testing the base model response](/images/posts/local-llm-commit/Test_Result_Base_Model.png)
+![Base model](/images/posts/local-llm-commit/Test_Result_Base_Model.png)
 
-The base model simply repeats whatever is in the diff. Absolutely zero effort, and it basically **fails completely** to generate a structured commit message.
-
-### The Fine-Tuned Model Response
-
-```text
-feat(docs-infra): add readme for explanation (#63444)
-```
-
-![Testing the fine-tuned model response](/images/posts/local-llm-commit/Test_Result_After_Finetuning.png)
-
-Oh, just look at that beauty! The fine-tuned model:
-- Uses the proper **conventional commit format**
-- Summarizes the changes nicely
-- Even throws in a **scope** for good measure!
-- And of course, it hallucinates a totally fake PR number :P 
-
-The behaviour clearly reflects the good manners it learned from our carefully crafted dataset.
-
-The model hallucinated the PR number because most of the commit messages in our training set actually had PR numbers glued to them. But honestly, that's not a big deal. For my use case, all I wanted was for the model to learn the conventional commit structure, and this proves that it absolutely did. In a way, even this hallucination is a strong sign of success!
+The base model simply repeats the diff.
 
 ---
 
-## Observations
-
-During testing, a few hilarious and interesting patterns popped up.
-
-### 1. Learned commit structure
-
-The model completely by-hearted the typical format:
+### Fine-Tuned Model
 
 ```text
-type(scope): description
+feat(core): add JWT validation and reject expired tokens(#63444)
 ```
 
-### 2. Scope generation
+![Fine tuned model](/images/posts/local-llm-commit/Test_Result_After_Finetuning.png)
 
-Sometimes the model confidently generates specific scopes like:
+The fine-tuned model:
 
-```text
-feat(core):
-fix(api):
-```
+- follows conventional commit format
+- summarizes the change
+- sometimes generates scopes
 
-It most likely picked up this habit from highly structured projects we used for training, like Angular.
-
-### 3. Fake GitHub PRs
-
-Sometimes, the model hallucinates heavily and drops PR numbers out of thin air (wow, that's what I call a pro-level developer improvement, honestly :P):
+Occasionally it even adds fake PR numbers like:
 
 ```text
 feat(core): add JWT validation (#12345)
 ```
 
-As mentioned earlier, it just simply thought, "Why not fake it till you make it?"
+The model hallucinated the PR number because most of the commit messages in our training set actually had PR numbers glued to them. But honestly, that's not a big deal. For my use case, all I wanted was for the model to learn the conventional commit structure, and this proves that it absolutely did. In a way, even this hallucination is a strong sign of success!
 
 ---
 
 ## Limitations
 
-As with all great initial setups, this experiment has a few limitations.
+This experiment is relatively small.
 
 ### Small dataset
 
-We only used:
+Only about:
 
 ```text
-~1400 commits
+1400 commits
 ```
 
-Actual production systems usually train on **tens of thousands** of examples to get things exactly right.
+Production systems usually train on tens of thousands.
 
 ### Diff truncation
 
-If your diff is excessively long (longer than 256 tokens), it just gets brutally truncated during training.
+Diffs longer than **256 tokens** are truncated.
 
 ### Occasional hallucinations
 
-As mentioned, the model sometimes generates PR numbers out of nowhere, acting strictly like a developer who just wants to close random JIRA tickets to look busy.
+Sometimes the model generates extra information like PR numbers.
 
 ---
 
 ## Future Improvements
 
-There is definitely plenty of scope for improvement here (pun strictly intended).
+Possible improvements:
 
-### 1. Larger dataset
+### Larger dataset
 
-We could expand the dataset to around **30k commits** using heavyweights like:
+Repositories like:
 
 ```text
 react
 kubernetes
 docker
-vite
-grafana
-prometheus
 terraform
 ```
 
-Doing this would definitely boost the overall performance. But it will obviously take a lot of time to train, and my MacBook will absolutely curse me for sure :P
+would improve training quality.
 
-### 2. Better scope detection
+### Better scope detection
 
-We could kindly teach the model to infer scopes directly from the changed directories. For example:
+Scopes could be inferred from directories like:
 
 ```text
 auth/
@@ -652,51 +664,86 @@ api/
 core/
 ```
 
-### 3. Longer context window
+### Longer context window
 
-We could theoretically increase the max sequence length to **384–512 tokens** to handle much larger diffs. 
+Increasing sequence length to **384–512 tokens**.
 
 ---
 
-## Why Local Fine-Tuning is Awesome
+## Why Local Fine Tuning is Interesting
 
-One of the most satisfying things about this whole experiment is that **everything runs locally**.
+The most satisfying part of this experiment is that **everything runs locally**.
 
-No renting cloud GPUs. No asking your manager for AWS credits. No expensive infrastructure whatsoever.
+No cloud GPUs.
 
-Just you, your coffee, and:
+No expensive infrastructure.
+
+Just:
 
 ```text
-MacBook Pro M4 Pro + MLX + LoRA
+MacBook + MLX + LoRA
 ```
 
-This makes exploring and building domain-specific LLMs highly accessible for developers like us.
+Local fine-tuning makes it easy for developers to experiment with domain-specific models.
 
 ---
 
 ## Final Thoughts
 
-This experiment practically proves that even with a **small dataset and some lightweight tuning**, you can happily teach an AI some very useful developer workflows.
+Even with a relatively small dataset and lightweight fine-tuning, the model learned to:
 
-Our fine-tuned buddy successfully learned to:
-- Interpret git diffs
-- Generate proper conventional commit messages
-- Follow specific commit style guidelines
+- interpret git diffs
+- generate conventional commit messages
+- follow commit style patterns
 
-And the entire setup happily runs locally on a laptop without catching fire.
+And the entire pipeline runs comfortably on a laptop.
 
-As local LLM tooling becomes even better, we will definitely see more specialized AI models taking over our daily chores, like:
-- Commit generation
+As local LLM tooling improves, we will likely see more specialised developer assistants for tasks like:
+
+- commit generation
 - PR summaries
-- Code review suggestions
-- Changelog generation
+- code review suggestions
+- changelog generation
 
-These small, highly focused models can be surprisingly effective. And honestly, it's quite fascinating. I literally can't wait to see what the future holds for us developers!
+Small focused models like this can actually be very powerful.
 
 ---
 
-## References
+## Try It Yourself
 
-- **MLX Framework:** [ml-explore/mlx](https://github.com/ml-explore/mlx)
-- **Qwen Models:** [QwenLM](https://github.com/QwenLM)
-- **Conventional Commits:** [conventionalcommits.org](https://www.conventionalcommits.org/)
+If you want to experiment with this yourself, the steps are roughly:
+
+1. Collect commits and diffs from a few repositories.
+2. Clean and balance the dataset.
+3. Train a LoRA adapter using MLX.
+4. Run inference using the base model + adapter.
+
+Example inference command:
+
+```bash
+mlx_lm.generate \
+  --model ./Qwen3.5-2B-Base \
+  --adapter-path ./commit-lora \
+  --temp 0 \
+  --max-tokens 20 \
+  --prompt "Generate a conventional commit message.
+
+Diff:
++ add JWT validation
++ reject expired tokens
+
+"
+```
+
+---
+
+# References
+
+MLX  
+https://github.com/ml-explore/mlx
+
+Qwen  
+https://github.com/QwenLM
+
+Conventional Commits  
+https://www.conventionalcommits.org/
