@@ -1,5 +1,5 @@
 ---
-title: "Training a Local LLM to Generate Git Commit Messages (MLX + LoRA)"
+title: "Training a Local LLM (Qwen3.5-2B) to Generate Git Commit Messages Using MLX + LoRA"
 date: 2026-03-08
 description: Training a small local LLM using MLX and LoRA to generate conventional commit messages directly from git diffs.
 hero: /images/posts/local-llm-commit/hero.png
