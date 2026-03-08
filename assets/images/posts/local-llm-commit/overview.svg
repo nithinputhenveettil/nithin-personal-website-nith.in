@@ -22,7 +22,8 @@ Local LLM for Git Commit Messages
 </text>
 
 <text x="600" y="120" text-anchor="middle" class="subtitle">
-Fine-tuning Qwen with MLX + LoRA
+Fine-tuning 
+Qwen3.5-2B-Base with MLX + LoRA
 </text>
 
 <!-- Git Diff -->
@@ -36,7 +37,8 @@ Fine-tuning Qwen with MLX + LoRA
 
 <!-- LLM -->
 <rect x="690" y="200" width="180" height="80" class="box"/>
-<text x="780" y="245" text-anchor="middle" class="label">Qwen LLM</text>
+<text x="780" y="240" text-anchor="middle" class="label">Qwen LLM</text>
+<text x="780" y="265" text-anchor="middle" class="label">Qwen3.5-2B-Base</text>
 
 <!-- Commit -->
 <rect x="960" y="200" width="180" height="80" class="box"/>
