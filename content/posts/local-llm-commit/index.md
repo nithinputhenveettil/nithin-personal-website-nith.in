@@ -1,8 +1,8 @@
 ---
-title: "I Trained a Local LLM to Write Git Commit Messages Because I Am Lazy"
-date: 2025-02-01
+title: "I Trained a Local LLM to Write Git Commit Messages and here is the result"
+date: 2026-03-07
 description: Training a small local LLM using MLX and LoRA to do the needful and generate conventional commit messages from git diffs.
-hero: /images/posts/local-llm-commit/hero.svg
+hero: /images/posts/local-llm-commit/hero.png
 menu:
   sidebar:
     name: Finetuning LLM locally
@@ -14,15 +14,35 @@ categories: ["Machine Learning", "Developer Tools"]
 
 ## Introduction
 
-So, this is the very first time I am actually trying to train an LLM locally. I have been using these LLMs for a while now, and honestly, I am quite impressed with their capabilities. So, I thought, why not try a custom setup and train one locally on my own machine? 
+Machine Learning was never a new thing for me, it facinated me every time from the time I started learning it. It was 2014, I was checking out the latest research papers for my acadamic project and I was blown away by the capabilities of that concept.
+
+Instead of writing if - else if - else type conditions, we can actually let the model learn the logic and do the needful. 
+
+How facinating it was.
+
+Back in 2014 I dont have internet in my home, all I had was a linux PC with intel dual core CPU and 2 GB RAM and a Idea 2G Net setter, and the speed was lower than a dial up connection, that too was unstable.
+
+But I still remember the thrill of it. I have to switch off X-Server(The UI server for Linux) to get some processing power for training the model.
+
+The project was a huge success(Or at least I say it like it was a success), I trained a model to learn the writing style of various authors and poredict which author wrote which book. 
+
+I will share the code here, https://github.com/nithinputhenveettil/authorship-predictor
+
+After 12 yesrs, yesterday I trained another model. This time it was finetuning a local LLM to generate conventional commit messages from git diffs. This time the computational power was not an issue, I own a MacBook Pro with M4 Pro, 24GB RAM. Btter in every sense.  I have been using these LLMs for a while now, and honestly, I am quite impressed with their capabilities. So, I thought, why not try a custom setup and train one locally on my own machine? 
+
+The joy and happiness was same, after 12 years, everything changed from comptation power to the tools I used to the process I followed, one thing was same, the thrill of it. 
+
+And in this blog, I am sharing the thrill. Let's get started.
+
+## The Setup
 
 The setup I used:
 
-- Apple MacBook Pro - M4 Pro (EMI status: ongoing)
+- Apple MacBook Pro - M4 Pro, 24GB RAM
 - MLX
 - LoRA
-- Qwen3.5-2B
-- LM Studio
+- Qwen3.5-2B-Base
+- LM Studio (for testing)
 - Python
 
 I decided to train the Qwen 3.5 2B Base model to kindly generate human-like commit messages in the conventional commit format, so I can simply stop typing them myself.
@@ -52,7 +72,7 @@ fix(api): handle invalid token error
 refactor(core): simplify request pipeline
 ```
 
-However, typing them out manually every single time? Very repetitive, boss.
+However, typing them out manually every single time? Very repetitive, right?
 
 So I simply wondered:
 
@@ -60,16 +80,16 @@ So I simply wondered:
 
 In this post, I will walk you through how I built a **commit message generator** by fine-tuning a small open-source model locally using **MLX** and **LoRA**.
 
-The whole drama runs **strictly on my MacBook**. No cloud GPUs, no AWS billing shocks.
+The whole drama runs **strictly on my MacBook**. No cloud GPUs, no billing shocks.
 
 ---
 
 ## Overview
 
-The grand architecture looks somewhat like this:
+The architecture looks somewhat like this:
 
 ```text
-Git Repositories
+Some Good Open source Git Repositories
         ↓
 Extract commits and diffs
         ↓
@@ -90,20 +110,20 @@ git diff → conventional commit message
 
 ## Choosing the Model
 
-For this experiment, my weapon of choice was:
+For this experiment, my choice was:
 
 ```text
-Qwen3.5-2B
+Qwen3.5-2B-Base
 ```
 
 Reasons for choosing it:
 
-- Small enough to run locally without my Mac taking flight like a Boeing.
+- Small enough to run locally without my Mac's temper boiling over.
 - Good base instruction-following capability.
 
 Now, to train locally on Apple Silicon, I used **MLX**.
 
-For the uninitiated, MLX is Apple’s own machine learning framework optimized for **Apple GPUs using Metal**. 
+MLX is Apple’s own machine learning framework optimized for **Apple GPUs using Metal**. 
 
 For the fine-tuning part, I went with **LoRA (Low-Rank Adaptation)**.
 
@@ -115,7 +135,7 @@ Example training output:
 Trainable parameters: 0.298% (5.6M / 1.88B)
 ```
 
-See? We are training **less than 1% of the full model**, which makes the whole process faster than ordering a masala dosa on Swiggy.
+See? We are training **less than 1% of the full model**, which makes the whole process a bit more faster.
 
 ---
 
@@ -127,7 +147,7 @@ To train the model, we obviously need examples of:
 Diff → Commit message
 ```
 
-I collected commits from a bunch of popular repositories that generally follow the conventional commit style (and yes, of course, ChatGPT kindly helped me copy-paste the scripts for this process, don't judge me :P).
+I collected commits from a bunch of popular repositories that generally follow the conventional commit style (and yes, of course, ChatGPT kindly helped me with this process :P).
 
 Repositories used:
 
@@ -158,7 +178,7 @@ feat(auth): add JWT validation and reject expired tokens
 
 ---
 
-## Cleaning the Dataset
+### Cleaning the Dataset
 
 Now, raw commit history contains a ridiculous amount of garbage:
 
@@ -169,7 +189,7 @@ Now, raw commit history contains a ridiculous amount of garbage:
 
 So, several filters were forcefully applied to clean this mess (Again, ChatGPT was my saviour here :P).
 
-### 1. Remove large diffs
+#### 1. Remove large diffs
 
 Huge diffs strictly do not fit within the model's context window. 
 
@@ -178,7 +198,7 @@ if diff.count("\n") > 200:
     skip() # Please go away
 ```
 
-### 2. Enforce the conventional format
+#### 2. Enforce the conventional format
 
 We only kept top-tier commits that matched perfectly with these prefixes:
 
@@ -189,9 +209,11 @@ refactor:
 perf:
 ```
 
-### 3. Balance the commit types
+#### 3. Balance the commit types
 
-If one commit type dominates our precious dataset, the model will just rote-memorize it like an engineering student the night before the exam. We need balance.
+If one commit type dominates our precious dataset, the model will just rote-memorize it like an engineering student the night before the exam. (Believe me, I learned this the hard way, for the first few tries the model was just spewing out 'doc' for everything because it was the most common type.)
+
+We need balance.
 
 Final dataset distribution:
 
@@ -208,9 +230,11 @@ Total dataset size:
 ~1400 samples
 ```
 
-### The Grand AI Dataset Extraction Script
+### The Dataset Extraction Script
 
 In case you want to try this setup yourself, here is the exact Python script I used to scrape, filter, and build the dataset directly from the local git repositories. It handles all the heavy lifting: extracting diffs, ditching garbage commits, and making sure our final sample sizes are perfectly balanced so the model doesn't just spew out 'refactor' for everything.
+
+Just clone what ever repositories you want to use(to the `repos` directory) and run the script. The script will create a `dataset` directory in the same directory as the script.
 
 ```python
 import subprocess
@@ -445,6 +469,8 @@ The entire training runs peacefully on the **Apple GPU via MLX**.
 
 Note: Please be informed that I had to do a lot of trial-and-error with these parameters for quite some time to get decent results. 
 
+This took around 20 - 25 Minutes to complete.
+
 ---
 
 ## Training Progress
@@ -471,9 +497,11 @@ The validation loss steadily decreased, meaning our model actually learned the m
 
 ---
 
-## Generating Commit Messages
+## Testing (Generating Commit Messages)
 
-After the training was successfully completed, the LoRA adapter could be loaded hand-in-hand with the base model. Here are the freshly baked adapter files sitting in my directory:
+After the training was successfully completed, the LoRA adapter could be loaded hand-in-hand with the base model. Ofcourse we can use mlx for this also, or we can use LM Studio or any other tool.
+
+Here are the freshly baked adapter files sitting in my directory:
 
 ![LoRA adapter files generated after finetuning](/images/posts/local-llm-commit/Finetuning_Files.png)
 
@@ -520,7 +548,7 @@ The base model simply repeats whatever is in the diff. Absolutely zero effort, a
 ### The Fine-Tuned Model Response
 
 ```text
-feat(core): add JWT validation and reject expired tokens
+feat(docs-infra): add readme for explanation (#63444)
 ```
 
 ![Testing the fine-tuned model response](/images/posts/local-llm-commit/Test_Result_After_Finetuning.png)
@@ -530,8 +558,13 @@ Oh, just look at that beauty! The fine-tuned model:
 - Uses the proper **conventional commit format**
 - Summarizes the changes nicely
 - Even throws in a **scope** for good measure!
+- And ofcourse, it throws an hallucinated PR number :P 
 
 The behaviour clearly reflects the good manners it learned from our carefully crafted dataset.
+
+The learned model hallucinated PR number, because most of our commit messages has PR numbers in them. But that's not a big deal, at least for my use case, all I want to see is that the model learned to generate conventional commit messages, and this shows that it did.
+
+Even this hallucination is a sign of success, because it shows that the model learned to generate conventional commit messages, and this shows that it did.
 
 ---
 
@@ -560,7 +593,7 @@ It most likely picked up this habit from highly structured projects like Angular
 
 ### 3. Fake GitHub PRs
 
-Occasionally, the model starts hallucinating heavily and drops PR numbers from thin air (wow, that's what I call a pro-level improvement, honestly :P):
+Occasionally(very occassianaly I would say), the model starts hallucinating heavily and drops PR numbers from thin air (wow, that's what I call a pro-level improvement, honestly :P):
 
 ```text
 feat(core): add JWT validation (#12345)
@@ -612,7 +645,7 @@ prometheus
 terraform
 ```
 
-Doing this would definitely boost the overall performance.
+Doing this would definitely boost the overall performance. But it will obviously take a lot of time to train and my macbook will curse me for sure :P
 
 ### 2. Better scope detection
 
@@ -628,7 +661,7 @@ core/
 
 ### 3. Longer context window
 
-We could supposedly increase the max sequence length to **384–512 tokens** to handle larger diffs. (But listen yaar, as powerful as my personal machine is, it simply can't handle that much heat right now :P)
+We could supposedly increase the max sequence length to **384–512 tokens** to handle larger diffs. 
 
 ---
 
@@ -638,7 +671,7 @@ One of the most satisfying things about this whole experiment is that **everythi
 
 No renting cloud GPUs. No asking your manager for AWS credits. No expensive infrastructure whatsoever.
 
-Just you, your cutting chai, and:
+Just you, your coffee, and:
 
 ```text
 MacBook Pro M4 Pro + MLX + LoRA
