@@ -719,6 +719,7 @@ If you want to experiment with this yourself, the steps are roughly:
 2. Clean and balance the dataset.
 3. Train a LoRA adapter using MLX.
 4. Run inference using the base model + adapter.
+
 You can find the full scripts, dataset preparation steps, and training instructions in the repository:
 https://github.com/nithinputhenveettil/mlx-llm-commit-message-finetuning
 
